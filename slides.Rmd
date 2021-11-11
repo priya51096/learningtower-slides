@@ -3,8 +3,7 @@ title: "R Package learningtower"
 subtitle: "Exploring Standardised Test Scores Across the Globe"
 author: 
   - "Priya Dingorkar"
-  - "Co-Advisor: Kevin Wang"
-  - "Supervisor: Di Cook"
+  - "Supervisors: Prof Di Cook & Kevin Wang"
 date: '`r Sys.Date()`'
 output:
   xaringan::moon_reader:
@@ -52,6 +51,8 @@ style_duo_accent(
 knitr::include_graphics("data/logo.png")
 ```
 
+Logo Design Credits - Sarah Romanes
+
 ]
 
 
@@ -71,23 +72,23 @@ devtools::install_github("kevinwang09/learningtower")
 
 ---
 
+#  What is PISA? 
 
-#  What is PISA?
 
 - The Organization for Economic Cooperation and Development [OECD](https://www.oecd.org/about/) is a global organization that aims to create better policies for better lives.
 
-- [PISA](https://www.oecd.org/pisa/) is one of OECD's Programme for International Student Assessment. 
+- [PISA](https://www.oecd.org/pisa/) is one of OECD's Programme for International Student Assessment.
 
 - PISA assesses 15-year-old students' potential to apply their knowledge and abilities in reading, mathematics, and science to real-world challenges.
 
 - The PISA test is primarily computer-based and lasts around 2 hours. The examination comprises both multiple choice and free entry questions.
 
-- PISA assessment areas seek to measure the following aspects of students' literacy in math, reading, and science. 
+- PISA assessment areas seek to measure the following aspects of students' literacy in math, reading, and science.
 
 
 ---
 
-# What is `learningtower` ? 
+# What is `learningtower` ?
 
 .pull-left[
 - The learningtower package gives access to a subset of variables from PISA data originally collected and are available from OECD, for the years 2000 - 2018, collected on a three year basis.
@@ -109,17 +110,92 @@ knitr::include_graphics("data/pisa_image.png")
 
 ]
 ---
+#Student Dataset
+.pull-left[
+- The student dataset comprises of the scores from the triennial testing of 15-year-olds worldwide.
 
-#what is student data
+- Information on their parents qualifications, family wealth, gender, and possession of computers, internet, cars, books, rooms, desks, and similar other variables.
+
+- The package only includes a portion of student data, called the student subset data, this subset of student data is available for all the years when the PISA experiment took place. The full year wise student data set can be downloaded using the `load_student()`
+
+]
+
+
+.pull-right[
+- The student subsets can be downloaded as follows:
+
+```{r, eval=FALSE, echo=TRUE}
+data(student_subset_2018, package = "learningtower")
+```
+
+
+- The entire student data can be downloaded as follows:
+
+```{r, eval=FALSE, echo=TRUE}
+#load the entire student data for a single year
+student_data_2018 <- load_student(2018)
+
+#load the entire student data for two/three years (2000, 2012, 2018)
+student_data_2012_2018 <- load_student(c(2012, 2018))
+student_data_2000_2012_2018 <- load_student(c(2000, 2012, 2018))
+
+#load the entire student data
+student_data_all <- load_student("all")
+```
+]
 
 ---
+#School and Country Datasets
+.pull-left[
+- The school dataset comprises school weight and other information such as the funding distribution of the schools, whether the school is private or public, the enrollment of boys and girls, the school size, and similar other characteristics of interest of different schools these 15-year-olds attend throughout the world.
 
-#whats is school and country data
+- You can downlaoded the school dataset as follows:
 
+```{r eval=FALSE, echo=TRUE}
+data(school, package = "learningtower")
+```
+]
+
+.pull-right[
+
+- The countrycode dataset contains mapping of the country ISO code to the country name.
+
+- You can downlaoded the countrycode dataset as follows:
+
+```{r eval=FALSE, echo=TRUE}
+data(countrycode, package = "learningtower")
+```
+]
+---
+#Research Questions
+.pull-left[
+- Is there any significant gender gaps between girls and boys across the world in the areas of mathematics, reading and science ?
+
+- Do the different socioeconomic factors have a significant impact on the the students academic performance ?
+
+- How did Australia perform in PISA ?
+
+- Example analyses in the R Journal article
+]
+
+.pull-right[
+```{r}
+knitr::include_graphics("data/rs.jpg")
+```
+]
 
 ---
+class: center, middle
+.pull-left[
+#Are girls smarter than boys?
+]
 
-
+.pull-right[
+```{r}
+knitr::include_graphics("data/gb.jpg")
+```
+]
+---
 
 ```{r gendergap}
 
@@ -371,15 +447,13 @@ sci_plot <- ggplot(sci_diff_conf_intervals,
                      labels = abs(seq(-60, 60, 20)))
 ```
 
-```{r score-differences, fig.cap ="Gender Gap Scores", fig.width=12, fig.height=10, fig.align='center', out.width=690}
+```{r score-differences, fig.cap ="Gender Gap Scores", fig.width=14, fig.height=9, fig.align='center'}
 math_plot + read_plot + sci_plot
 ```
 ---
 
 
-
 ```{r}
-
 theme_map <- function(...) {
   theme_minimal() +
   theme(
@@ -426,10 +500,10 @@ world_map <- map_data("world") %>%
 math_world_data <- full_join(
   x = math_map_data,
   y = world_map,
-  by = "country_name") %>% 
+  by = "country_name") %>%
   rename(Country = country_name,
-         math = diff) %>%
-  mutate(math = round(math, digits = 2))
+         Math = diff) %>%
+  mutate(Math = round(Math, digits = 2))
 ```
 
 
@@ -446,7 +520,7 @@ world_map <- map_data("world") %>%
 read_world_data <- full_join(
   x = read_map_data,
   y = world_map,
-  by = "country_name") %>% 
+  by = "country_name") %>%
   rename(Country = country_name,
          Reading = diff) %>%
   mutate(Reading = round(Reading, digits = 2))
@@ -466,13 +540,13 @@ world_map <- map_data("world") %>%
 sci_world_data <- full_join(
   x = sci_map_data,
   y = world_map,
-  by = "country_name") %>% 
+  by = "country_name") %>%
   rename(Country = country_name,
          Science = diff)  %>%
   mutate(Science = round(Science, digits = 2))
 
 math_dat <- math_world_data %>%
-  dplyr::select(Country, math, lat, long, group)
+  dplyr::select(Country, Math, lat, long, group)
 
 read_dat <- read_world_data %>%
   dplyr::select(Country, Reading, lat, long, group)
@@ -507,39 +581,30 @@ mrs_maps <- ggplot(math_read_sci_dat_wider,
 ```{r plotly-maps, fig.cap="Maps", fig.align="center", out.width=650}
 mrs_maps
 ```
+
 ---
-# Correlation Plot
+class: center, middle
+.pull-left[
+#Impact of Socioeconomic Factors on Students' Performance
+]
+.pull-right[
 ```{r}
-p1 <- ggplot(data = student_country,
-             aes(x = math, y = read)) +
-  geom_hex() +
-  labs(x = "Math Scores",
-       y = "Reading Scores") +
-  theme(legend.position="none")
-
-p2 <- ggplot(data = student_country,
-             aes(x = math, y = science)) +
-  geom_hex() +
-  labs(x = "Math Scores",
-       y = "Science Scores") +
-  theme(legend.position = "none")
-
-p3 <- ggplot(data = student_country,
-             aes(x = read, y = science)) +
-  geom_hex() +
-  labs(x = "Reading Scores",
-       y = "Science Scores") +
-  theme(legend.position="none")
+knitr::include_graphics("data/socio.jpg")
 ```
 
-```{r corr-plot, fig.cap ="Scatrplot", fig.width=9, fig.height=5, fig.align='center'}
-p1+p2+p3
-```
-
-
+]
 ---
+class: center, middle
+.pull-left[
+#Impact of Father's and Mother's Qualification on Students' Score
+]
 
-
+.pull-right[
+```{r}
+knitr::include_graphics("data/mf.jpg")
+```
+]
+---
 
 ```{r}
 student_country_data <- left_join(student_2018,
@@ -624,10 +689,21 @@ father_qual_math <- ggplot(father_qual_math_read_sci_data,
          title = "math Scores and Father's Qualification")
 ```
 
-```{r qual-plot, fig.cap ="Qual Plots", fig.width=9, fig.height=9, fig.align='center'}
+```{r qual-plot, fig.width=12, fig.height=9, fig.align='center'}
 father_qual_math + mother_qual_math
 ```
 
+---
+class: center, middle
+.pull-left[
+#Relationship between Number of TVs in a Household and Average Math Scores across countries.
+]
+
+.pull-right[
+```{r}
+knitr::include_graphics("data/tv_img.jpg")
+```
+]
 ---
 
 ```{r}
@@ -690,7 +766,16 @@ tv_plot
 ```
 
 ---
-
+class: center, middle
+.pull-left[
+#Impact of the Number of Books per Household on Average Math Scores across countries.
+]
+.pull-right[
+```{r}
+knitr::include_graphics("data/books.jpg")
+```
+]
+---
 ```{r}
 z_star_95 <- qnorm(0.975)
 
@@ -743,59 +828,17 @@ book_plot
 ```
 
 ---
+# Temporal Trend
 
-```{r}
-int_math_read_sci_data <- student_country_data %>%
-  group_by(country_name, internet) %>%
-  dplyr::summarise(math_avg = weighted.mean(math, w = stu_wgt, na.rm = TRUE),
-                   read_avg = weighted.mean(read, w = stu_wgt, na.rm = TRUE),
-                   sci_avg  =  weighted.mean(science, w = stu_wgt, na.rm = TRUE)) %>%
-  na.omit()
+- The PISA 2018 results were released on 3 December 2019. This led to wringing of hands in the Australian press, with titles of stories like: [Vital Signs: Australia's slipping student scores will lead to greater income inequality](https://theconversation.com/vital-signs-australias-slipping-student-scores-will-lead-to-greater-income-inequality-128301) and [In China, Nicholas studied maths 20 hours a week. In Australia, it's three](https://www.smh.com.au/education/in-china-nicholas-studied-maths-20-hours-a-week-in-australia-it-s-three-20191203-p53ggv.html).
 
-comp_math_read_sci_data <- student_country_data %>%
-  group_by(country_name, computer) %>%
-  dplyr::summarise(math_avg = weighted.mean(math, w = stu_wgt, na.rm = TRUE),
-                   read_avg = weighted.mean(read, w = stu_wgt, na.rm = TRUE),
-                   sci_avg  =  weighted.mean(science, w = stu_wgt, na.rm = TRUE)) %>%
-  na.omit()
-
-
-computer_plot <- comp_math_read_sci_data %>%
-  ggplot(aes(x=computer,
-             y= math_avg,
-             group = country_name)) +
-    geom_point(color = "black",
-               size=0.36) +
-    geom_line(size = .27,
-              alpha = .45) +
-    theme(legend.position = "none") +
-    labs(x = "Possession of Computer",
-         y = "Average Mathematics Score",
-         title = "Impact of Computers on Average Math Scores")
-
-
-internet_plot <- int_math_read_sci_data %>%
-  ggplot(aes(x=internet,
-             y= math_avg,
-             group = country_name )) +
-    geom_point(color = "black",
-               size=0.36) +
-    geom_line(size = .27,
-              alpha = .45) +
-    theme(legend.position = "none") +
-    labs(x = "Access to Internet",
-         y = "Average Mathematics Score",
-         title = "Impact of Internet on Average Math Scores")
+```{r, out.width="50%", fig.align='center'}
+knitr::include_graphics("data/conversation_holden.png")
 ```
 
-
-
-```{r compint-plot, fig.cap ="Computers and the Internet", fig.width=8, fig.height=6, fig.align='center',}
-computer_plot + internet_plot
-```
+- Australia's neighbours, New Zealand and Indonesia, are also worrying: [New Zealand top-end in OECD's latest PISA report but drop in achievements 'worrying'](https://www.stuff.co.nz/national/education/117890945/new-zealand-topend-in-oecds-latest-pisa-report-but-drop-in-achievements-worrying), [Not even mediocre? Indonesian students score low in math, reading, science: PISA report](https://www.thejakartapost.com/news/2019/12/04/not-even-mediocre-indonesian-students-score-low-in-math-reading-science-pisa-report.html).
 
 ---
-
 ```{r}
 # Load student data, and filter to country, cache a copy of the data
 # to save downloading every time paper is knitted
@@ -868,7 +911,7 @@ if (!file.exists("data/all_bs_cf.rda")) {
 
 ```
 
-```{r bs-plot, fig.cap ="Temporal patterns", fig.height=9, fig.width=12, fig.align='center'}
+```{r bs-plot, fig.cap ="Temporal patterns", fig.height=9, fig.width=14, fig.align='center'}
 all_bs_cf <- all_bs_cf %>%
   mutate(year = as.numeric(as.character(year)),
          country_name = factor(country_name))
@@ -881,22 +924,22 @@ all_bs_cf <- all_bs_cf %>%
                  #          "Indonesia"))
 
 
-country_names_highlight <- c("Australia", 
-                             "Germany", 
-                             "Peru", 
-                             "Qatar", 
-                             "Belgium", 
-                             "Brazil", 
-                             "Denmark", 
+country_names_highlight <- c("Australia",
+                             "Germany",
+                             "Peru",
+                             "Qatar",
+                             "Belgium",
+                             "Brazil",
+                             "Denmark",
                              "Greece",
-                             "Thailand", 
-                             "Singapore", 
-                             "Canada", 
+                             "Thailand",
+                             "Singapore",
+                             "Canada",
                              "Portugal")
 
-math_all_bs_cf_plot <- all_bs_cf %>% 
-  dplyr::filter(subject == "math") %>% 
-  ggplot(aes(x = year, 
+math_all_bs_cf_plot <- all_bs_cf %>%
+  dplyr::filter(subject == "math") %>%
+  ggplot(aes(x = year,
       y = avg)) +
   geom_point(alpha = 0.45) +
   geom_line(aes(group = country_name)) +
@@ -904,12 +947,12 @@ math_all_bs_cf_plot <- all_bs_cf %>%
   labs(
     title = "Maths",
      x = "",
-     y = "Score") 
+     y = "Score")
 
 
-read_all_bs_cf_plot <- all_bs_cf %>% 
-  dplyr::filter(subject == "read") %>% 
-  ggplot(aes(x = year, 
+read_all_bs_cf_plot <- all_bs_cf %>%
+  dplyr::filter(subject == "read") %>%
+  ggplot(aes(x = year,
       y = avg)) +
   geom_point(alpha = 0.45) +
   geom_line(aes(group = country_name)) +
@@ -917,11 +960,11 @@ read_all_bs_cf_plot <- all_bs_cf %>%
   labs(
     title = "Reading",
      x = "",
-     y = "Score") 
+     y = "Score")
 
-sci_all_bs_cf_plot <- all_bs_cf %>% 
-  dplyr::filter(subject == "science") %>% 
-  ggplot(aes(x = year, 
+sci_all_bs_cf_plot <- all_bs_cf %>%
+  dplyr::filter(subject == "science") %>%
+  ggplot(aes(x = year,
       y = avg)) +
   geom_point(alpha = 0.45) +
   geom_line(aes(group = country_name)) +
@@ -937,16 +980,26 @@ math_all_bs_cf_plot + read_all_bs_cf_plot + sci_all_bs_cf_plot
 ```
 
 ---
+# Temporal Trend
 
+.pull-left[
+- Qatar or Peru initially have low scores and this increases further. 
 
+- Australia’s initially performance is a top achievement, and it only drops by a few points.
 
+- Countries with lower initial PISA results have a tendency to increase their score each time the PISA exam is taken.
+
+- Countries that have previously established a standard with great scores drop by a few points and this not a drastic drop in their scores.
+]
+
+.pull-right[
 ```{r}
 student_country_anim <- left_join(student_all,
                                   countrycode,
                                   by = "country") %>%
   group_by(year) %>%
   ungroup() %>%
-  dplyr::select(year, country, country_name, 
+  dplyr::select(year, country, country_name,
                 math, read, science, stu_wgt) %>%
   na.omit()
 
@@ -994,8 +1047,8 @@ country_continent <-
   read_csv("data/country_continent.csv") %>%
   select(iso3, continent)
 
-student_country_anim_avg <- left_join(student_country_anim_avg, 
-     select(country_continent, iso3, continent), 
+student_country_anim_avg <- left_join(student_country_anim_avg,
+     select(country_continent, iso3, continent),
      by = c("countrycode"="iso3"))
 
 student_anim_data <- student_country_anim_avg
@@ -1010,9 +1063,9 @@ gif <- ggplot(student_anim_data,
   geom_point(size=2, alpha=0.5) +
   geom_label(data = filter(student_anim_data,
                           country_name %in%
-                            c("Australia", 
+                            c("Australia",
                               "New Zealand",
-                              "Indonesia", 
+                              "Indonesia",
                               "Qatar",
                               "Singapore",
                               "Germany",
@@ -1024,14 +1077,14 @@ gif <- ggplot(student_anim_data,
                               "Brazil",
                               "Colombia",
                               "Chile",
-                              "USA")), 
-            aes(label = country_name, 
+                              "USA")),
+            aes(label = country_name,
                 group = country_name), size=4) +
   theme_minimal() +
-  theme(legend.position = "none", 
-        #axis.line = element_blank(), 
+  theme(legend.position = "none",
+        #axis.line = element_blank(),
         aspect.ratio=1) +
-  transition_states(year, 
+  transition_states(year,
                     transition_length = 1,
                     state_length = 1,
                     wrap = FALSE)   +
@@ -1042,8 +1095,32 @@ gif <- ggplot(student_anim_data,
   xlim(c(250, 650)) + ylim(c(300, 600)) +
   enter_fade() + exit_fade()
 
-animate(gif, fps = 5, end_pause = 1) 
+animate(gif, fps = 5, end_pause = 1)
 ```
+]
+
+---
+# Conclusion
+
+- R Package `learningtower`
+
+- Example Analyses - R Journal Article. 
+
+- Titled:
+
+>learningtower: an R package for Exploring Standardised Test Scores Across the Globe
+
+- Great Learning Experience
+
+> "Research means that you don’t know, but are willing to find out." - Charles F. Kettering
+
+---
+# Thank you
+```{r, fig.align='center'}
+knitr::include_graphics("data/ty.gif")
+```
+
+
 
 
 
